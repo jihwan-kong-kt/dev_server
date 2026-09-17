@@ -18,7 +18,8 @@ def setup_module(module):
 def test_health():
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    # assert r.json() == {"status": "ok"}
+    assert r.json() == {"status": "ok", "version": "2"}
 
 
 def test_create_user():

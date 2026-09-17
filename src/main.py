@@ -51,7 +51,8 @@ def get_db():
 #Health Check
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    # return {"status": "ok"}
+    return {"status": "ok", "version": "2"}
 
 # Create User
 @app.post("/users", response_model=UserResponse, status_code=201)
