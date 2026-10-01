@@ -37,4 +37,5 @@ jobs:
             $NEXUS_AZURE:8082/dev-server-api:$TAG
       
       - name: Summary
-        run: echo "배포용 태그: $TAG ➝ Jenkins 의 IMAGE_TAG 에 입력" >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo "배포용 태그: $TAG ➝ Jenkins 의 IMAGE_TAG 에 입력" >> $GITHUB_STEP_SUMMARY
