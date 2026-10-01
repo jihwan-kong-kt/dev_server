@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+# FROM python:3.11-slim
+FROM localhost:5001/python:3.11-slim
 
 WORKDIR /app
 

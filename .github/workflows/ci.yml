@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: [self-hosted, lab]
+    env:
+      IMAGE: localhost:8082/dev-server-api    # Docker 데몬 기준 주소 = nexus svc-dev
+      NEXUS_AZURE: 10.20.0.30                 # 컨테이너에서 직접 갈 때의 주소
+      TAG: ${{ github.run_number }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test
+        working-directory: src
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -q -r requirements.txt -r requirements-dev.txt
+          .venv/bin/pytest -q
+      
+      - name: Build image
+        run: |
+          docker build -t $IMAGE:$TAG .
+        
+      - name: Push to Nexus (svc-dev)
+        run: |
+          echo "${{ secrets.NEXUS_PASSWORD }}" | docker login localhost:8082 -u "${{ secrets.NEXUS_USERNAME }}" --password-stdin
+          docker push $IMAGE:$TAG
+      
+      - name: Scan with Trivy
+        run: |
+          docker run --rm --network enterprise-lab_azure -v trivy_cache:/root/.cache/trivy \
+            aquasec/trivy:0.58.2 image --insecure --ignore-unfixed --severity HIGH,CRITICAL --exit-code 0 \
+            $NEXUS_AZURE:8082/dev-server-api:$TAG
+      
+      - name: Summary
+        run: echo "배포용 태그: $TAG ➝ Jenkins의 IMAGE_TAG 에 입력" >> $GITHUB_STEP_SUMMARY
